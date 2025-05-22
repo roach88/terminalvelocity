@@ -1,0 +1,91 @@
+{
+  "default": {
+    "title": "Terminal Velocity - Developer Portfolio",
+    "description": "An interactive terminal-style portfolio showcasing modern web development skills and projects.",
+    "keywords": [
+      "developer",
+      "portfolio",
+      "terminal",
+      "web development",
+      "svelte",
+      "typescript"
+    ],
+    "author": "Developer",
+    "image": "/icon.png"
+  },
+  "pages": {
+    "blog": {
+      "welcome-to-my-terminal": {
+        "title": "Welcome to My Terminal - Terminal Velocity",
+        "description": "An introduction to my new terminal-style portfolio and blog",
+        "keywords": [
+          "meta",
+          "portfolio",
+          "terminal",
+          "blog",
+          "development"
+        ],
+        "publishedTime": "2025-01-22",
+        "type": "article"
+      },
+      "building-terminal-interfaces": {
+        "title": "Building Modern Terminal Interfaces - Terminal Velocity",
+        "description": "Exploring the art of creating engaging terminal-style user interfaces for the web",
+        "keywords": [
+          "frontend",
+          "ui/ux",
+          "terminal",
+          "svelte",
+          "blog",
+          "development"
+        ],
+        "publishedTime": "2025-01-21",
+        "type": "article"
+      },
+      "svelte-performance-tips": {
+        "title": "Svelte Performance Optimization Tips - Terminal Velocity",
+        "description": "Essential techniques for building lightning-fast Svelte applications",
+        "keywords": [
+          "svelte",
+          "performance",
+          "optimization",
+          "frontend",
+          "blog",
+          "development"
+        ],
+        "publishedTime": "2025-01-20",
+        "type": "article"
+      }
+    },
+    "projects": {
+      "terminal-portfolio": {
+        "title": "Terminal Portfolio - Terminal Velocity",
+        "description": "A terminal-style portfolio and blog built with Svelte",
+        "keywords": [
+          "Svelte",
+          "TypeScript",
+          "Tailwind CSS",
+          "Vite",
+          "project",
+          "development"
+        ],
+        "publishedTime": "2025-01-22",
+        "type": "article"
+      },
+      "svelte-terminal-kit": {
+        "title": "Svelte Terminal Kit - Terminal Velocity",
+        "description": "A reusable terminal component library for Svelte applications",
+        "keywords": [
+          "Svelte",
+          "TypeScript",
+          "NPM",
+          "Rollup",
+          "project",
+          "development"
+        ],
+        "publishedTime": "2025-01-20",
+        "type": "article"
+      }
+    }
+  }
+}

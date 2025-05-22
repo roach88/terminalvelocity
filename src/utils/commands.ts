@@ -4,15 +4,18 @@ import { history } from '../stores/history';
 import { theme } from '../stores/theme';
 import { fetchAbout, fetchBlogPosts, fetchBlogPost, fetchProjects, fetchProject, searchContent } from './content';
 import { TerminalFormatter } from './formatter';
+import { ShortcutManager } from './shortcuts';
 
 const hostname = window.location.hostname;
+const shortcutManager = new ShortcutManager();
 
 export const commands: Record<string, (args: string[]) => Promise<string> | string> = {
   help: () => {
     const commandGroups = {
       'Content': ['about', 'blog', 'read', 'projects', 'project', 'contact'],
       'Discovery': ['search', 'tags', 'recent', 'featured', 'stats'],
-      'System': ['help', 'clear', 'theme', 'hostname', 'whoami', 'date'],
+      'System': ['help', 'clear', 'theme', 'hostname', 'whoami', 'date', 'version', 'uptime'],
+      'Utilities': ['shortcuts', 'aliases'],
       'Fun': ['weather', 'curl', 'banner', 'sudo', 'vi', 'vim', 'emacs']
     };
 
@@ -299,4 +302,68 @@ Portfolio: ${packageJson.author.url || 'https://terminalvelocity.dev'}`;
 🏷️  Unique tags: ${uniqueTags}
 🛠️  Technologies used: ${uniqueTech}`;
   },
+  shortcuts: () => {
+    const shortcuts = shortcutManager.getShortcutsList();
+    let result = 'Keyboard Shortcuts:\n\n';
+    
+    shortcuts.forEach(shortcut => {
+      const keys = [];
+      if (shortcut.ctrl) keys.push('Ctrl');
+      if (shortcut.alt) keys.push('Alt');
+      if (shortcut.shift) keys.push('Shift');
+      keys.push(shortcut.key.toUpperCase());
+      
+      result += `${keys.join('+')} - ${shortcut.description}\n`;
+    });
+    
+    return result;
+  },
+  aliases: () => {
+    const aliases = shortcutManager.getAllAliases();
+    let result = 'Command Aliases:\n\n';
+    
+    aliases.forEach(([alias, command]) => {
+      result += `${alias} → ${command}\n`;
+    });
+    
+    result += '\nTip: Use aliases for faster navigation!';
+    return result;
+  },
+  version: () => {
+    return `Terminal Velocity v${packageJson.version}
+Built with:
+- Svelte ${packageJson.devDependencies.svelte || 'latest'}
+- TypeScript ${packageJson.devDependencies.typescript || 'latest'}
+- Vite ${packageJson.devDependencies.vite || 'latest'}
+- Tailwind CSS ${packageJson.devDependencies.tailwindcss || 'latest'}
+
+GitHub: ${packageJson.repository.url}`;
+  },
+  uptime: () => {
+    const start = performance.timeOrigin;
+    const now = performance.now();
+    const uptime = now / 1000;
+    
+    const hours = Math.floor(uptime / 3600);
+    const minutes = Math.floor((uptime % 3600) / 60);
+    const seconds = Math.floor(uptime % 60);
+    
+    return `Terminal has been running for ${hours}h ${minutes}m ${seconds}s`;
+  },
 };
+
+// Command execution with alias resolution
+export function executeCommand(input: string): { commandName: string; args: string[] } {
+  const [commandName, ...args] = input.split(' ');
+  const resolvedCommand = shortcutManager.getAlias(commandName);
+  
+  if (resolvedCommand.includes(' ')) {
+    // Handle aliases that expand to multiple words
+    const [newCommand, ...aliasArgs] = resolvedCommand.split(' ');
+    return { commandName: newCommand, args: [...aliasArgs, ...args] };
+  }
+  
+  return { commandName: resolvedCommand, args };
+}
+
+export { shortcutManager };

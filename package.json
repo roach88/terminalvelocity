@@ -15,8 +15,10 @@
   },
   "scripts": {
     "dev": "npm run build:content && vite",
-    "build": "npm run build:content && vite build",
+    "build": "npm run build:content && npm run build:seo && vite build",
     "build:content": "node scripts/build-content.js",
+    "build:seo": "node scripts/generate-seo.js",
+    "build:all": "npm run build:content && npm run build:seo",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },

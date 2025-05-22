@@ -1,5 +1,6 @@
 import matter from 'gray-matter';
 import { marked } from 'marked';
+import { PerformanceOptimizer } from './performance';
 
 export interface BlogPost {
   slug: string;
@@ -39,10 +40,16 @@ export async function processMarkdown(markdownContent: string) {
 
 // Runtime functions to fetch processed content
 export async function fetchBlogPosts(): Promise<BlogPost[]> {
+  const cacheKey = 'blog-posts';
+  const cached = PerformanceOptimizer.getCachedContent(cacheKey);
+  if (cached) return cached;
+
   try {
     const response = await fetch('/api/blog.json');
     if (!response.ok) return [];
-    return response.json();
+    const data = await response.json();
+    PerformanceOptimizer.cacheContent(cacheKey, data);
+    return data;
   } catch (error) {
     console.error('Failed to fetch blog posts:', error);
     return [];
@@ -50,10 +57,16 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
 }
 
 export async function fetchBlogPost(slug: string): Promise<BlogPost | null> {
+  const cacheKey = `blog-post-${slug}`;
+  const cached = PerformanceOptimizer.getCachedContent(cacheKey);
+  if (cached) return cached;
+
   try {
     const response = await fetch(`/api/blog/${slug}.json`);
     if (!response.ok) return null;
-    return response.json();
+    const data = await response.json();
+    PerformanceOptimizer.cacheContent(cacheKey, data);
+    return data;
   } catch (error) {
     console.error(`Failed to fetch blog post ${slug}:`, error);
     return null;
@@ -61,10 +74,16 @@ export async function fetchBlogPost(slug: string): Promise<BlogPost | null> {
 }
 
 export async function fetchProjects(): Promise<Project[]> {
+  const cacheKey = 'projects';
+  const cached = PerformanceOptimizer.getCachedContent(cacheKey);
+  if (cached) return cached;
+
   try {
     const response = await fetch('/api/projects.json');
     if (!response.ok) return [];
-    return response.json();
+    const data = await response.json();
+    PerformanceOptimizer.cacheContent(cacheKey, data);
+    return data;
   } catch (error) {
     console.error('Failed to fetch projects:', error);
     return [];
@@ -83,10 +102,16 @@ export async function fetchProject(slug: string): Promise<Project | null> {
 }
 
 export async function fetchAbout(): Promise<AboutPage | null> {
+  const cacheKey = 'about-page';
+  const cached = PerformanceOptimizer.getCachedContent(cacheKey);
+  if (cached) return cached;
+
   try {
     const response = await fetch('/api/about.json');
     if (!response.ok) return null;
-    return response.json();
+    const data = await response.json();
+    PerformanceOptimizer.cacheContent(cacheKey, data);
+    return data;
   } catch (error) {
     console.error('Failed to fetch about page:', error);
     return null;

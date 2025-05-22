@@ -2,6 +2,90 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile optimizations */
+.is-mobile {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.is-mobile input {
+  font-size: 16px; /* Prevent zoom on iOS */
+}
+
+.keyboard-open {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Touch-friendly elements */
+@media (max-width: 768px) {
+  .mobile-commands button {
+    min-height: 44px; /* iOS touch target */
+    min-width: 44px;
+  }
+  
+  /* Improved scrolling on mobile */
+  main {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Hide desktop-only elements */
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+/* Performance optimizations */
+* {
+  box-sizing: border-box;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles for accessibility */
+input:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+button:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Better text rendering */
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  body {
+    color-scheme: dark;
+  }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  .border-opacity-30 {
+    border-opacity: 1 !important;
+  }
+  
+  .bg-opacity-10 {
+    background-opacity: 0.3 !important;
+  }
+}
+
 @font-face {
   font-family: 'Cascadia Code';
   src: url('/fonts/CascadiaCode.ttf')
