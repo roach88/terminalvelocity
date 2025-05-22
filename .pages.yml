@@ -1,0 +1,117 @@
+collections:
+  blog:
+    label: Blog Posts
+    folder: content/blog
+    create: true
+    fields:
+      - name: title
+        label: Title
+        widget: string
+        required: true
+      - name: date
+        label: Date
+        widget: datetime
+        format: YYYY-MM-DD
+        required: true
+      - name: excerpt
+        label: Excerpt
+        widget: text
+        required: true
+        hint: A brief description of the post
+      - name: tags
+        label: Tags
+        widget: list
+        required: false
+        hint: Comma-separated tags
+      - name: published
+        label: Published
+        widget: boolean
+        default: true
+      - name: body
+        label: Content
+        widget: markdown
+        required: true
+
+  projects:
+    label: Projects
+    folder: content/projects
+    create: true
+    fields:
+      - name: title
+        label: Title
+        widget: string
+        required: true
+      - name: description
+        label: Description
+        widget: text
+        required: true
+        hint: Brief project description
+      - name: tech
+        label: Technologies
+        widget: list
+        required: true
+        hint: Technologies used in the project
+      - name: status
+        label: Status
+        widget: select
+        options:
+          - active
+          - completed
+          - planning
+          - archived
+        default: active
+      - name: featured
+        label: Featured
+        widget: boolean
+        default: false
+        hint: Show in featured projects
+      - name: repo
+        label: Repository URL
+        widget: string
+        required: false
+      - name: live
+        label: Live URL
+        widget: string
+        required: false
+      - name: created
+        label: Created Date
+        widget: datetime
+        format: YYYY-MM-DD
+        required: true
+      - name: body
+        label: Content
+        widget: markdown
+        required: true
+
+  pages:
+    label: Pages
+    files:
+      - name: about
+        label: About Page
+        file: content/about.md
+        fields:
+          - name: title
+            label: Title
+            widget: string
+            required: true
+          - name: updated
+            label: Last Updated
+            widget: datetime
+            format: YYYY-MM-DD
+            required: true
+          - name: body
+            label: Content
+            widget: markdown
+            required: true
+
+media_folder: public/media
+public_folder: /media
+
+site_url: https://terminalvelocity.dev
+display_url: https://terminalvelocity.dev
+
+backend:
+  name: git-gateway
+  branch: main
+
+publish_mode: editorial_workflow

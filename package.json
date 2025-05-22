@@ -1,17 +1,13 @@
 {
-  "name": "terminal",
+  "name": "terminalvelocity",
   "private": true,
-  "version": "3.3.4",
+  "version": "1.0.0",
   "type": "module",
   "license": "MIT",
   "author": {
-    "name": "Yassine Fathi",
-    "url": "https://fathi.me",
-    "email": "yassine@fathi.me"
-  },
-  "funding": {
-    "type": "Paypal",
-    "url": "https://paypal.me/yfthi"
+    "name": "Your Name",
+    "url": "https://terminalvelocity.dev",
+    "email": "your.email@example.com"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,17 @@
+{
+  "slug": "svelte-terminal-kit",
+  "title": "Svelte Terminal Kit",
+  "description": "A reusable terminal component library for Svelte applications",
+  "tech": [
+    "Svelte",
+    "TypeScript",
+    "NPM",
+    "Rollup"
+  ],
+  "status": "planning",
+  "featured": false,
+  "repo": "https://github.com/roach88/svelte-terminal-kit",
+  "live": null,
+  "created": "2025-01-20",
+  "content": "<h1>Svelte Terminal Kit</h1>\n<p>A comprehensive terminal component library that makes it easy to add terminal interfaces to any Svelte application.</p>\n<h2>Features</h2>\n<ul>\n<li><strong>Plug-and-play components</strong>: Drop in terminal functionality with minimal setup</li>\n<li><strong>Customizable themes</strong>: Extensive theming system with popular terminal color schemes</li>\n<li><strong>Command system</strong>: Built-in command registration and execution</li>\n<li><strong>History management</strong>: Command history with persistence</li>\n<li><strong>Mobile responsive</strong>: Works great on all device sizes</li>\n</ul>\n<h2>Components</h2>\n<h3>Terminal</h3>\n<p>The main terminal interface component.</p>\n<h3>Input</h3>\n<p>Handles command input with autocomplete and history.</p>\n<h3>Output</h3>\n<p>Formats and displays command outputs.</p>\n<h3>Theme Provider</h3>\n<p>Manages terminal themes and styling.</p>\n<h2>Use Cases</h2>\n<p>Perfect for:</p>\n<ul>\n<li>Developer portfolios</li>\n<li>Interactive documentation</li>\n<li>CLI tool demos</li>\n<li>Educational interfaces</li>\n<li>Retro-style applications</li>\n</ul>\n<h2>Roadmap</h2>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> Core terminal components</li>\n<li><input disabled=\"\" type=\"checkbox\"> Theme system</li>\n<li><input disabled=\"\" type=\"checkbox\"> Command registration API</li>\n<li><input disabled=\"\" type=\"checkbox\"> NPM package setup</li>\n<li><input disabled=\"\" type=\"checkbox\"> Documentation site</li>\n<li><input disabled=\"\" type=\"checkbox\"> Example implementations</li>\n</ul>\n<p>This library aims to democratize terminal interfaces, making them accessible to developers of all skill levels.</p>\n"
+}

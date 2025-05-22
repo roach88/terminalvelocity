@@ -11,5 +11,33 @@
     ],
     "published": true,
     "content": "<h1>Welcome to My Terminal</h1>\n<p>Welcome to my new portfolio site! I&#39;ve always been fascinated by terminal interfaces and wanted to create something that showcases both my technical skills and provides a unique user experience.</p>\n<h2>Why a Terminal Interface?</h2>\n<p>Terminal interfaces are:</p>\n<ul>\n<li><strong>Efficient</strong>: Direct command-based navigation</li>\n<li><strong>Nostalgic</strong>: Appeals to developers and tech enthusiasts  </li>\n<li><strong>Interactive</strong>: Engaging way to explore content</li>\n<li><strong>Memorable</strong>: Stands out from typical portfolio sites</li>\n</ul>\n<h2>Getting Started</h2>\n<p>Try these commands to explore:</p>\n<ul>\n<li><code>help</code> - See all available commands</li>\n<li><code>about</code> - Learn more about me</li>\n<li><code>projects</code> - View my projects</li>\n<li><code>blog</code> - Read my latest posts</li>\n</ul>\n<h2>What&#39;s Coming</h2>\n<p>I&#39;m planning to add more interactive features, including:</p>\n<ul>\n<li>Enhanced content search</li>\n<li>Project demos</li>\n<li>Interactive tutorials</li>\n<li>And much more!</li>\n</ul>\n<p>Thanks for visiting, and enjoy exploring!</p>\n"
+  },
+  {
+    "slug": "building-terminal-interfaces",
+    "title": "Building Modern Terminal Interfaces",
+    "date": "2025-01-21",
+    "excerpt": "Exploring the art of creating engaging terminal-style user interfaces for the web",
+    "tags": [
+      "frontend",
+      "ui/ux",
+      "terminal",
+      "svelte"
+    ],
+    "published": true,
+    "content": "<h1>Building Modern Terminal Interfaces</h1>\n<p>Terminal interfaces have made a remarkable comeback in web development. What was once considered outdated is now seen as innovative and engaging.</p>\n<h2>Why Terminal UIs Work</h2>\n<p>Terminal interfaces offer several advantages:</p>\n<ul>\n<li><strong>Efficiency</strong>: Direct command-based interaction</li>\n<li><strong>Familiarity</strong>: Developers feel at home</li>\n<li><strong>Unique Experience</strong>: Stands out from typical web interfaces</li>\n<li><strong>Accessibility</strong>: Often more keyboard-friendly</li>\n</ul>\n<h2>Technical Implementation</h2>\n<p>When building a terminal interface, consider:</p>\n<h3>Component Architecture</h3>\n<ul>\n<li>Input handling for commands</li>\n<li>History management</li>\n<li>Output formatting</li>\n<li>Theme system</li>\n</ul>\n<h3>Performance Considerations</h3>\n<ul>\n<li>Virtual scrolling for long outputs</li>\n<li>Efficient command parsing</li>\n<li>Minimal re-renders</li>\n</ul>\n<h3>User Experience</h3>\n<ul>\n<li>Tab completion</li>\n<li>Command history navigation</li>\n<li>Mobile-friendly adaptations</li>\n</ul>\n<h2>Modern Tools</h2>\n<p>The ecosystem for building terminal UIs has evolved:</p>\n<ul>\n<li><strong>Svelte</strong>: Reactive components</li>\n<li><strong>TypeScript</strong>: Type safety</li>\n<li><strong>Tailwind</strong>: Utility-first styling</li>\n<li><strong>Vite</strong>: Fast development</li>\n</ul>\n<p>Terminal interfaces represent a perfect blend of nostalgia and innovation, creating memorable user experiences that developers and users alike appreciate.</p>\n"
+  },
+  {
+    "slug": "svelte-performance-tips",
+    "title": "Svelte Performance Optimization Tips",
+    "date": "2025-01-20",
+    "excerpt": "Essential techniques for building lightning-fast Svelte applications",
+    "tags": [
+      "svelte",
+      "performance",
+      "optimization",
+      "frontend"
+    ],
+    "published": true,
+    "content": "<h1>Svelte Performance Optimization Tips</h1>\n<p>Svelte is already incredibly fast, but there are always ways to squeeze out even better performance.</p>\n<h2>Bundle Size Optimization</h2>\n<p>Keep your bundles lean:</p>\n<h3>Tree Shaking</h3>\n<ul>\n<li>Import only what you need</li>\n<li>Use ES modules consistently</li>\n<li>Avoid default exports when possible</li>\n</ul>\n<h3>Dynamic Imports</h3>\n<pre><code class=\"language-javascript\">const { HeavyComponent } = await import(&#39;./HeavyComponent.svelte&#39;);\n</code></pre>\n<h2>Runtime Performance</h2>\n<h3>Reactive Statements</h3>\n<ul>\n<li>Use <code>$:</code> sparingly and efficiently</li>\n<li>Avoid complex computations in reactive blocks</li>\n<li>Consider using derived stores for complex logic</li>\n</ul>\n<h3>Component Updates</h3>\n<ul>\n<li>Use <code>key</code> blocks for list updates</li>\n<li>Implement custom equality checks when needed</li>\n<li>Leverage Svelte&#39;s built-in optimizations</li>\n</ul>\n<h2>Memory Management</h2>\n<h3>Store Cleanup</h3>\n<ul>\n<li>Unsubscribe from stores in <code>onDestroy</code></li>\n<li>Use auto-subscribing <code>$</code> syntax when possible</li>\n<li>Clear intervals and timeouts</li>\n</ul>\n<h3>Event Listeners</h3>\n<pre><code class=\"language-javascript\">onMount(() =&gt; {\n  const cleanup = addEventListener(&#39;scroll&#39;, handleScroll);\n  return cleanup;\n});\n</code></pre>\n<h2>Development Tools</h2>\n<ul>\n<li>Use Svelte DevTools</li>\n<li>Profile with browser dev tools</li>\n<li>Measure bundle sizes regularly</li>\n</ul>\n<p>Remember: premature optimization is the root of all evil. Profile first, optimize second!</p>\n"
   }
 ]

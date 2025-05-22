@@ -1,0 +1,14 @@
+{
+  "slug": "svelte-performance-tips",
+  "title": "Svelte Performance Optimization Tips",
+  "date": "2025-01-20",
+  "excerpt": "Essential techniques for building lightning-fast Svelte applications",
+  "tags": [
+    "svelte",
+    "performance",
+    "optimization",
+    "frontend"
+  ],
+  "published": true,
+  "content": "<h1>Svelte Performance Optimization Tips</h1>\n<p>Svelte is already incredibly fast, but there are always ways to squeeze out even better performance.</p>\n<h2>Bundle Size Optimization</h2>\n<p>Keep your bundles lean:</p>\n<h3>Tree Shaking</h3>\n<ul>\n<li>Import only what you need</li>\n<li>Use ES modules consistently</li>\n<li>Avoid default exports when possible</li>\n</ul>\n<h3>Dynamic Imports</h3>\n<pre><code class=\"language-javascript\">const { HeavyComponent } = await import(&#39;./HeavyComponent.svelte&#39;);\n</code></pre>\n<h2>Runtime Performance</h2>\n<h3>Reactive Statements</h3>\n<ul>\n<li>Use <code>$:</code> sparingly and efficiently</li>\n<li>Avoid complex computations in reactive blocks</li>\n<li>Consider using derived stores for complex logic</li>\n</ul>\n<h3>Component Updates</h3>\n<ul>\n<li>Use <code>key</code> blocks for list updates</li>\n<li>Implement custom equality checks when needed</li>\n<li>Leverage Svelte&#39;s built-in optimizations</li>\n</ul>\n<h2>Memory Management</h2>\n<h3>Store Cleanup</h3>\n<ul>\n<li>Unsubscribe from stores in <code>onDestroy</code></li>\n<li>Use auto-subscribing <code>$</code> syntax when possible</li>\n<li>Clear intervals and timeouts</li>\n</ul>\n<h3>Event Listeners</h3>\n<pre><code class=\"language-javascript\">onMount(() =&gt; {\n  const cleanup = addEventListener(&#39;scroll&#39;, handleScroll);\n  return cleanup;\n});\n</code></pre>\n<h2>Development Tools</h2>\n<ul>\n<li>Use Svelte DevTools</li>\n<li>Profile with browser dev tools</li>\n<li>Measure bundle sizes regularly</li>\n</ul>\n<p>Remember: premature optimization is the root of all evil. Profile first, optimize second!</p>\n"
+}

@@ -92,3 +92,20 @@ export async function fetchAbout(): Promise<AboutPage | null> {
     return null;
   }
 }
+
+// Search functionality
+export async function searchContent(query: string) {
+  try {
+    const [posts, projects] = await Promise.all([
+      fetchBlogPosts(),
+      fetchProjects()
+    ]);
+
+    const { SearchIndex } = await import('./search');
+    const searchIndex = new SearchIndex(posts, projects);
+    return searchIndex.search(query);
+  } catch (error) {
+    console.error('Search failed:', error);
+    return [];
+  }
+}
