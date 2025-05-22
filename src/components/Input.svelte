@@ -167,13 +167,13 @@
       id="command-input"
       name="command-input"
       aria-label="Command input"
-      class="w-full px-2 bg-transparent outline-none"
+      class="w-full px-2 bg-transparent outline-none border-none focus:outline-none focus:ring-0"
       type="text"
       autocomplete="off"
       autocorrect="off"
       autocapitalize="off"
       spellcheck="false"
-      style={`color: ${$theme.foreground}`}
+      style={`color: ${$theme.foreground}; box-shadow: none; border: none;`}
       bind:value={command}
       on:keydown={handleKeyDown}
       on:input={handleInput}

@@ -52,8 +52,17 @@
 
 /* Focus styles for accessibility */
 input:focus {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Specifically for command input */
+#command-input:focus,
+#command-input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 button:focus {
