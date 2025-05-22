@@ -5,7 +5,7 @@ import path from 'path';
 const blogData = JSON.parse(fs.readFileSync('./public/api/blog.json', 'utf8'));
 const projectsData = JSON.parse(fs.readFileSync('./public/api/projects.json', 'utf8'));
 
-const baseUrl = 'https://terminalvelocity.dev'; // Update with your actual domain
+const baseUrl = process.env.CF_PAGES_URL || process.env.DEPLOY_URL || 'https://terminalvelocity.dev';
 
 // Generate sitemap.xml
 function generateSitemap() {

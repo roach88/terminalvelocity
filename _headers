@@ -1,0 +1,31 @@
+# Security and performance headers for Cloudflare Pages
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://identity.netlify.com https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://wttr.in https://api.github.com
+
+# Cache static assets
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/icon.png
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache API responses
+/api/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
+# Cache HTML with short TTL
+/*.html
+  Cache-Control: public, max-age=300, stale-while-revalidate=3600
+
+# Cache other assets
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
