@@ -1,0 +1,15 @@
+[
+  {
+    "slug": "welcome-to-my-terminal",
+    "title": "Welcome to My Terminal",
+    "date": "2025-01-22",
+    "excerpt": "An introduction to my new terminal-style portfolio and blog",
+    "tags": [
+      "meta",
+      "portfolio",
+      "terminal"
+    ],
+    "published": true,
+    "content": "<h1>Welcome to My Terminal</h1>\n<p>Welcome to my new portfolio site! I&#39;ve always been fascinated by terminal interfaces and wanted to create something that showcases both my technical skills and provides a unique user experience.</p>\n<h2>Why a Terminal Interface?</h2>\n<p>Terminal interfaces are:</p>\n<ul>\n<li><strong>Efficient</strong>: Direct command-based navigation</li>\n<li><strong>Nostalgic</strong>: Appeals to developers and tech enthusiasts  </li>\n<li><strong>Interactive</strong>: Engaging way to explore content</li>\n<li><strong>Memorable</strong>: Stands out from typical portfolio sites</li>\n</ul>\n<h2>Getting Started</h2>\n<p>Try these commands to explore:</p>\n<ul>\n<li><code>help</code> - See all available commands</li>\n<li><code>about</code> - Learn more about me</li>\n<li><code>projects</code> - View my projects</li>\n<li><code>blog</code> - Read my latest posts</li>\n</ul>\n<h2>What&#39;s Coming</h2>\n<p>I&#39;m planning to add more interactive features, including:</p>\n<ul>\n<li>Enhanced content search</li>\n<li>Project demos</li>\n<li>Interactive tutorials</li>\n<li>And much more!</li>\n</ul>\n<p>Thanks for visiting, and enjoy exploring!</p>\n"
+  }
+]
