@@ -1,8 +1,8 @@
 import packageJson from '../../package.json';
 import themes from '../../themes.json';
-import { history } from '../stores/history';
+import { clearHistory } from '../stores/history';
 import { theme } from '../stores/theme';
-import { fetchAbout, fetchBlogPosts, fetchBlogPost, fetchProjects, fetchProject, searchContent } from './content';
+import { fetchAbout, fetchBlogPost, fetchBlogPosts, fetchProject, fetchProjects, searchContent } from './content';
 import { TerminalFormatter } from './formatter';
 import { ShortcutManager } from './shortcuts';
 
@@ -20,19 +20,19 @@ export const commands: Record<string, (args: string[]) => Promise<string> | stri
     };
 
     let helpText = 'Available commands:\n\n';
-    
+
     for (const [group, cmds] of Object.entries(commandGroups)) {
       helpText += `${group}:\n`;
       helpText += cmds.map(cmd => `  ${cmd}`).join('\n');
       helpText += '\n\n';
     }
-    
+
     helpText += 'Tips:\n';
     helpText += '  - Use Tab for autocompletion\n';
     helpText += '  - Use ↑/↓ arrows for command history\n';
     helpText += '  - Try "search <term>" to find content\n';
     helpText += '  - Use "stats" to see portfolio overview';
-    
+
     return helpText;
   },
   hostname: () => hostname,
@@ -97,19 +97,13 @@ export const commands: Record<string, (args: string[]) => Promise<string> | stri
     return 'Opening repository...';
   },
   clear: () => {
-    history.set([]);
-
+    clearHistory();
     return '';
   },
   email: () => {
     window.open(`mailto:${packageJson.author.email}`);
 
     return `Opening mailto:${packageJson.author.email}...`;
-  },
-  donate: () => {
-    window.open(packageJson.funding.url, '_blank');
-
-    return 'Opening donation url...';
   },
   weather: async (args: string[]) => {
     const city = args.join('+');
@@ -142,19 +136,19 @@ export const commands: Record<string, (args: string[]) => Promise<string> | stri
     }
   },
   banner: () => `
-████████╗███████╗██████╗ ███╗   ███╗██╗███╗   ██╗ █████╗ ██╗     
-╚══██╔══╝██╔════╝██╔══██╗████╗ ████║██║████╗  ██║██╔══██╗██║     
-   ██║   █████╗  ██████╔╝██╔████╔██║██║██╔██╗ ██║███████║██║     
-   ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║██║╚██╗██║██╔══██║██║     
+████████╗███████╗██████╗ ███╗   ███╗██╗███╗   ██╗ █████╗ ██╗
+╚══██╔══╝██╔════╝██╔══██╗████╗ ████║██║████╗  ██║██╔══██╗██║
+   ██║   █████╗  ██████╔╝██╔████╔██║██║██╔██╗ ██║███████║██║
+   ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║██║╚██╗██║██╔══██║██║
    ██║   ███████╗██║  ██║██║ ╚═╝ ██║██║██║ ╚████║██║  ██║███████╗
    ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝
-                                                                  
+
 ██╗   ██╗███████╗██╗      ██████╗  ██████╗██╗████████╗██╗   ██╗
 ██║   ██║██╔════╝██║     ██╔═══██╗██╔════╝██║╚══██╔══╝╚██╗ ██╔╝
-██║   ██║█████╗  ██║     ██║   ██║██║     ██║   ██║    ╚████╔╝ 
-╚██╗ ██╔╝██╔══╝  ██║     ██║   ██║██║     ██║   ██║     ╚██╔╝  
- ╚████╔╝ ███████╗███████╗╚██████╔╝╚██████╗██║   ██║      ██║   
-  ╚═══╝  ╚══════╝╚══════╝ ╚═════╝  ╚═════╝╚═╝   ╚═╝      ╚═╝   
+██║   ██║█████╗  ██║     ██║   ██║██║     ██║   ██║    ╚████╔╝
+╚██╗ ██╔╝██╔══╝  ██║     ██║   ██║██║     ██║   ██║     ╚██╔╝
+ ╚████╔╝ ███████╗███████╗╚██████╔╝╚██████╗██║   ██║      ██║
+  ╚═══╝  ╚══════╝╚══════╝ ╚═════╝  ╚═════╝╚═╝   ╚═╝      ╚═╝
 
 Welcome to Terminal Velocity - A Developer Portfolio
 
@@ -170,33 +164,36 @@ Type 'projects' to see my work.
     return TerminalFormatter.stripHtml(aboutData.content);
   },
   blog: async (args: string[]) => {
-    if (args.length === 0) {
-      const posts = await fetchBlogPosts();
-      if (posts.length === 0) {
-        return 'No blog posts available.';
-      }
-      return TerminalFormatter.formatBlogList(posts);
+    const posts = await fetchBlogPosts();
+    if (posts.length === 0) {
+      return 'No blog posts available.';
     }
-    
-    const subcommand = args[0];
-    if (subcommand === 'list') {
-      const posts = await fetchBlogPosts();
+
+    // Handle 'blog list' for compatibility
+    if (args.length > 0 && args[0] === 'list') {
       return posts.map(post => `${post.date} - ${post.title}`).join('\n');
     }
-    
-    return 'Usage: blog [list] or read <post-slug>';
+
+    // Default behavior: show formatted list with slugs
+    let output = 'Blog Posts:\n\n';
+    posts.forEach((post, i) => {
+      output += `[${i + 1}] ${post.date} - ${post.title}\n`;
+      output += `    read ${post.slug}\n\n`;
+    });
+    output += 'Tip: Use "read <slug>" to read a post, or "blog list" for a compact view.';
+    return output;
   },
   read: async (args: string[]) => {
     if (args.length === 0) {
       return 'Usage: read <post-slug>';
     }
-    
+
     const slug = args[0];
     const post = await fetchBlogPost(slug);
     if (!post) {
       return `Blog post '${slug}' not found.`;
     }
-    
+
     return TerminalFormatter.formatBlogPost(post);
   },
   projects: async () => {
@@ -204,20 +201,20 @@ Type 'projects' to see my work.
     if (projects.length === 0) {
       return 'No projects available.';
     }
-    
+
     return TerminalFormatter.formatProjectList(projects);
   },
   project: async (args: string[]) => {
     if (args.length === 0) {
       return 'Usage: project <project-slug>';
     }
-    
+
     const slug = args[0];
     const project = await fetchProject(slug);
     if (!project) {
       return `Project '${slug}' not found.`;
     }
-    
+
     return TerminalFormatter.formatProject(project);
   },
   contact: () => {
@@ -230,14 +227,14 @@ Portfolio: ${packageJson.author.url || 'https://terminalvelocity.dev'}`;
     if (args.length === 0) {
       return 'Usage: search <query>\nExample: search "terminal portfolio"';
     }
-    
+
     const query = args.join(' ');
     const results = await searchContent(query);
-    
+
     if (results.length === 0) {
       return `No results found for "${query}".`;
     }
-    
+
     return `Search results for "${query}":\n\n${TerminalFormatter.formatSearchResults(results)}`;
   },
   tags: async () => {
@@ -247,12 +244,12 @@ Portfolio: ${packageJson.author.url || 'https://terminalvelocity.dev'}`;
       acc[tag] = (acc[tag] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     const sortedTags = Object.entries(tagCounts)
       .sort(([,a], [,b]) => b - a)
       .map(([tag, count]) => `${tag} (${count})`);
-    
-    return sortedTags.length > 0 
+
+    return sortedTags.length > 0
       ? `Available tags:\n${sortedTags.join(', ')}`
       : 'No tags found.';
   },
@@ -260,21 +257,21 @@ Portfolio: ${packageJson.author.url || 'https://terminalvelocity.dev'}`;
     const limit = args.length > 0 ? parseInt(args[0]) || 5 : 5;
     const posts = await fetchBlogPosts();
     const recentPosts = posts.slice(0, limit);
-    
+
     if (recentPosts.length === 0) {
       return 'No recent posts available.';
     }
-    
+
     return `${limit} most recent posts:\n\n${TerminalFormatter.formatBlogList(recentPosts)}`;
   },
   featured: async () => {
     const projects = await fetchProjects();
     const featuredProjects = projects.filter(p => p.featured);
-    
+
     if (featuredProjects.length === 0) {
       return 'No featured projects available.';
     }
-    
+
     return `Featured projects:\n\n${TerminalFormatter.formatProjectList(featuredProjects)}`;
   },
   stats: async () => {
@@ -282,18 +279,18 @@ Portfolio: ${packageJson.author.url || 'https://terminalvelocity.dev'}`;
       fetchBlogPosts(),
       fetchProjects()
     ]);
-    
+
     const totalWords = posts.reduce((acc, post) => {
       const words = TerminalFormatter.stripHtml(post.content).split(/\s+/).length;
       return acc + words;
     }, 0);
-    
+
     const allTags = posts.flatMap(post => post.tags);
     const uniqueTags = new Set(allTags).size;
-    
+
     const techStack = projects.flatMap(p => p.tech);
     const uniqueTech = new Set(techStack).size;
-    
+
     return `Portfolio Statistics:
 📝 Blog posts: ${posts.length}
 🚀 Projects: ${projects.length}
@@ -305,27 +302,27 @@ Portfolio: ${packageJson.author.url || 'https://terminalvelocity.dev'}`;
   shortcuts: () => {
     const shortcuts = shortcutManager.getShortcutsList();
     let result = 'Keyboard Shortcuts:\n\n';
-    
+
     shortcuts.forEach(shortcut => {
       const keys = [];
       if (shortcut.ctrl) keys.push('Ctrl');
       if (shortcut.alt) keys.push('Alt');
       if (shortcut.shift) keys.push('Shift');
       keys.push(shortcut.key.toUpperCase());
-      
+
       result += `${keys.join('+')} - ${shortcut.description}\n`;
     });
-    
+
     return result;
   },
   aliases: () => {
     const aliases = shortcutManager.getAllAliases();
     let result = 'Command Aliases:\n\n';
-    
+
     aliases.forEach(([alias, command]) => {
       result += `${alias} → ${command}\n`;
     });
-    
+
     result += '\nTip: Use aliases for faster navigation!';
     return result;
   },
@@ -343,11 +340,11 @@ GitHub: ${packageJson.repository.url}`;
     const start = performance.timeOrigin;
     const now = performance.now();
     const uptime = now / 1000;
-    
+
     const hours = Math.floor(uptime / 3600);
     const minutes = Math.floor((uptime % 3600) / 60);
     const seconds = Math.floor(uptime % 60);
-    
+
     return `Terminal has been running for ${hours}h ${minutes}m ${seconds}s`;
   },
 };
@@ -356,13 +353,13 @@ GitHub: ${packageJson.repository.url}`;
 export function executeCommand(input: string): { commandName: string; args: string[] } {
   const [commandName, ...args] = input.split(' ');
   const resolvedCommand = shortcutManager.getAlias(commandName);
-  
+
   if (resolvedCommand.includes(' ')) {
     // Handle aliases that expand to multiple words
     const [newCommand, ...aliasArgs] = resolvedCommand.split(' ');
     return { commandName: newCommand, args: [...aliasArgs, ...args] };
   }
-  
+
   return { commandName: resolvedCommand, args };
 }
 

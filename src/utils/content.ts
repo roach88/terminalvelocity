@@ -46,12 +46,18 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
 
   try {
     const response = await fetch('/api/blog.json');
-    if (!response.ok) return [];
+    if (!response.ok) {
+      console.error(`Failed to fetch blog posts: HTTP ${response.status} ${response.statusText}`);
+      return [];
+    }
     const data = await response.json();
     PerformanceOptimizer.cacheContent(cacheKey, data);
     return data;
   } catch (error) {
     console.error('Failed to fetch blog posts:', error);
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      console.error('Network error: Unable to reach /api/blog.json');
+    }
     return [];
   }
 }
@@ -63,12 +69,18 @@ export async function fetchBlogPost(slug: string): Promise<BlogPost | null> {
 
   try {
     const response = await fetch(`/api/blog/${slug}.json`);
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`Failed to fetch blog post '${slug}': HTTP ${response.status} ${response.statusText}`);
+      return null;
+    }
     const data = await response.json();
     PerformanceOptimizer.cacheContent(cacheKey, data);
     return data;
   } catch (error) {
-    console.error(`Failed to fetch blog post ${slug}:`, error);
+    console.error(`Failed to fetch blog post '${slug}':`, error);
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      console.error(`Network error: Unable to reach /api/blog/${slug}.json`);
+    }
     return null;
   }
 }
@@ -80,12 +92,18 @@ export async function fetchProjects(): Promise<Project[]> {
 
   try {
     const response = await fetch('/api/projects.json');
-    if (!response.ok) return [];
+    if (!response.ok) {
+      console.error(`Failed to fetch projects: HTTP ${response.status} ${response.statusText}`);
+      return [];
+    }
     const data = await response.json();
     PerformanceOptimizer.cacheContent(cacheKey, data);
     return data;
   } catch (error) {
     console.error('Failed to fetch projects:', error);
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      console.error('Network error: Unable to reach /api/projects.json');
+    }
     return [];
   }
 }
@@ -93,10 +111,16 @@ export async function fetchProjects(): Promise<Project[]> {
 export async function fetchProject(slug: string): Promise<Project | null> {
   try {
     const response = await fetch(`/api/projects/${slug}.json`);
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`Failed to fetch project '${slug}': HTTP ${response.status} ${response.statusText}`);
+      return null;
+    }
     return response.json();
   } catch (error) {
-    console.error(`Failed to fetch project ${slug}:`, error);
+    console.error(`Failed to fetch project '${slug}':`, error);
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      console.error(`Network error: Unable to reach /api/projects/${slug}.json`);
+    }
     return null;
   }
 }
@@ -108,12 +132,18 @@ export async function fetchAbout(): Promise<AboutPage | null> {
 
   try {
     const response = await fetch('/api/about.json');
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`Failed to fetch about page: HTTP ${response.status} ${response.statusText}`);
+      return null;
+    }
     const data = await response.json();
     PerformanceOptimizer.cacheContent(cacheKey, data);
     return data;
   } catch (error) {
     console.error('Failed to fetch about page:', error);
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      console.error('Network error: Unable to reach /api/about.json');
+    }
     return null;
   }
 }

@@ -8,3 +8,9 @@ export const history = writable<Array<Command>>(
 history.subscribe((value) => {
   localStorage.setItem('history', JSON.stringify(value));
 });
+
+// Add a function to clear both the store and localStorage
+export function clearHistory() {
+  history.set([]);
+  localStorage.removeItem('history');
+}

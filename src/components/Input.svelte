@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { afterUpdate, onMount } from 'svelte';
-  import { history } from '../stores/history';
-  import { theme } from '../stores/theme';
-  import { commands, executeCommand, shortcutManager } from '../utils/commands';
-  import { track } from '../utils/tracking';
-  import { MobileAdapter } from '../utils/mobile';
-  import { SEOOptimizer } from '../utils/seo';
-  import { PerformanceOptimizer } from '../utils/performance';
+  import { afterUpdate, onMount } from 'svelte'
+  import { history } from '../stores/history'
+  import { theme } from '../stores/theme'
+  import { commands, executeCommand, shortcutManager } from '../utils/commands'
+  import { MobileAdapter } from '../utils/mobile'
+  import { PerformanceOptimizer } from '../utils/performance'
+  import { SEOOptimizer } from '../utils/seo'
+  import { track } from '../utils/tracking'
 
   let command = '';
   let historyIndex = -1;
@@ -16,17 +16,11 @@
   let input: HTMLInputElement;
 
   onMount(() => {
-    input.focus();
-
-    if ($history.length === 0) {
-      const command = commands['banner'] as () => string;
-
-      if (command) {
-        const output = command();
-
-        $history = [...$history, { command: 'banner', outputs: [output] }];
-      }
+    if (import.meta.env.DEV) {
+      localStorage.removeItem('history');
+      history.set([]);
     }
+    input.focus();
 
     // Show mobile command suggestions on mobile devices
     showMobileCommands = MobileAdapter.isMobileDevice;
@@ -51,6 +45,7 @@
     }
 
     if (event.key === 'Enter') {
+      if (!command.trim()) return;
       const { commandName, args } = executeCommand(command);
 
       // Performance measurement for slow commands
@@ -126,6 +121,7 @@
   on:click={() => {
     input.focus();
   }}
+  on:keydown={handleKeyDown}
 />
 
 <!-- Mobile command suggestions -->
@@ -179,19 +175,27 @@
       on:input={handleInput}
       bind:this={input}
     />
-    
+
     <!-- Desktop suggestions dropdown -->
     {#if suggestions.length > 0 && !showMobileCommands}
-      <div 
+      <div
         class="absolute top-full left-0 w-full mt-1 border border-opacity-30 rounded shadow-lg z-10 hidden md:block"
         style={`background-color: ${$theme.background}; border-color: ${$theme.green};`}
       >
         {#each suggestions.slice(0, 5) as suggestion, index}
           <div
+            role="button"
+            tabindex="0"
             class="px-3 py-2 text-sm cursor-pointer hover:bg-opacity-20 transition-all"
             style={`color: ${$theme.foreground}; background-color: ${index === 0 ? $theme.green + '20' : 'transparent'};`}
             on:click={() => { command = suggestion; suggestions = []; input.focus(); }}
-            on:keydown={() => {}}
+            on:keydown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                command = suggestion;
+                suggestions = [];
+                input.focus();
+              }
+            }}
           >
             {suggestion}
           </div>

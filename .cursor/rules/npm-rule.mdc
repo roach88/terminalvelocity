@@ -1,0 +1,6 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+For all Javascript/Typescript/React projects, ALWAYS use npm as the package manager
