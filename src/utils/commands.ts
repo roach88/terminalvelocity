@@ -1,7 +1,6 @@
 import packageJson from '../../package.json';
-import themes from '../../themes.json';
 import { clearHistory } from '../stores/history';
-import { theme } from '../stores/theme';
+import { setContent } from '../stores/content';
 import { fetchAbout, fetchBlogPost, fetchBlogPosts, fetchProject, fetchProjects, searchContent } from './content';
 import { TerminalFormatter } from './formatter';
 import { ShortcutManager } from './shortcuts';
@@ -14,24 +13,35 @@ export const commands: Record<string, (args: string[]) => Promise<string> | stri
     const commandGroups = {
       'Content': ['about', 'blog', 'read', 'projects', 'project', 'contact'],
       'Discovery': ['search', 'tags', 'recent', 'featured', 'stats'],
-      'System': ['help', 'clear', 'theme', 'hostname', 'whoami', 'date', 'version', 'uptime'],
+      'System': ['help', 'clear', 'hostname', 'whoami', 'date', 'version', 'uptime'],
       'Utilities': ['shortcuts', 'aliases'],
       'Fun': ['weather', 'curl', 'banner', 'sudo', 'vi', 'vim', 'emacs']
     };
 
-    let helpText = 'Available commands:\n\n';
+    let helpText = '<div class="space-y-4">';
+    helpText += '<p class="text-lg mb-4">Available commands:</p>';
 
     for (const [group, cmds] of Object.entries(commandGroups)) {
-      helpText += `${group}:\n`;
-      helpText += cmds.map(cmd => `  ${cmd}`).join('\n');
-      helpText += '\n\n';
+      helpText += `<div class="mb-4">`;
+      helpText += `<h3 class="font-bold text-base mb-2" style="color: #c96342">${group}:</h3>`;
+      helpText += '<div class="grid grid-cols-2 md:grid-cols-3 gap-2">';
+      for (const cmd of cmds) {
+        helpText += `<code class="bg-black/30 px-2 py-1 rounded text-sm">${cmd}</code>`;
+      }
+      helpText += '</div>';
+      helpText += '</div>';
     }
 
-    helpText += 'Tips:\n';
-    helpText += '  - Use Tab for autocompletion\n';
-    helpText += '  - Use ↑/↓ arrows for command history\n';
-    helpText += '  - Try "search <term>" to find content\n';
-    helpText += '  - Use "stats" to see portfolio overview';
+    helpText += '<div class="mt-6 space-y-2">';
+    helpText += '<h3 class="font-bold text-base mb-2" style="color: #c96342">Tips:</h3>';
+    helpText += '<ul class="list-disc list-inside space-y-1">';
+    helpText += '<li>Use <kbd class="bg-black/30 px-2 py-0.5 rounded text-sm">Tab</kbd> for autocompletion</li>';
+    helpText += '<li>Use <kbd class="bg-black/30 px-2 py-0.5 rounded text-sm">↑</kbd>/<kbd class="bg-black/30 px-2 py-0.5 rounded text-sm">↓</kbd> arrows for command history</li>';
+    helpText += '<li>Try <code class="bg-black/30 px-2 py-1 rounded text-sm">search &lt;term&gt;</code> to find content</li>';
+    helpText += '<li>Use <code class="bg-black/30 px-2 py-1 rounded text-sm">stats</code> to see portfolio overview</li>';
+    helpText += '</ul>';
+    helpText += '</div>';
+    helpText += '</div>';
 
     return helpText;
   },
@@ -47,50 +57,6 @@ export const commands: Record<string, (args: string[]) => Promise<string> | stri
 
     return `Permission denied: unable to run the command '${args[0]}' as root.`;
   },
-  theme: (args: string[]) => {
-    const usage = `Usage: theme [args].
-    [args]:
-      ls: list all available themes
-      set: set theme to [theme]
-
-    [Examples]:
-      theme ls
-      theme set gruvboxdark
-    `;
-    if (args.length === 0) {
-      return usage;
-    }
-
-    switch (args[0]) {
-      case 'ls': {
-        let result = themes.map((t) => t.name.toLowerCase()).join(', ');
-        result += `You can preview all these themes here: ${packageJson.repository.url}/tree/master/docs/themes`;
-
-        return result;
-      }
-
-      case 'set': {
-        if (args.length !== 2) {
-          return usage;
-        }
-
-        const selectedTheme = args[1];
-        const t = themes.find((t) => t.name.toLowerCase() === selectedTheme);
-
-        if (!t) {
-          return `Theme '${selectedTheme}' not found. Try 'theme ls' to see all available themes.`;
-        }
-
-        theme.set(t);
-
-        return `Theme set to ${selectedTheme}`;
-      }
-
-      default: {
-        return usage;
-      }
-    }
-  },
   repo: () => {
     window.open(packageJson.repository.url, '_blank');
 
@@ -98,6 +64,19 @@ export const commands: Record<string, (args: string[]) => Promise<string> | stri
   },
   clear: () => {
     clearHistory();
+    // Reset content panel to welcome message
+    setContent('Welcome', `<div class="space-y-4">
+      <h2 class="text-2xl font-bold mb-4">Welcome to Terminal Velocity</h2>
+      <p>This is an interactive terminal-style portfolio. Use the terminal on the left to explore my work.</p>
+      
+      <h3 class="text-lg font-semibold mt-6 mb-2">Quick Start:</h3>
+      <ul class="list-disc list-inside space-y-1">
+        <li><code class="bg-black/30 px-2 py-1 rounded">help</code> - View all available commands</li>
+        <li><code class="bg-black/30 px-2 py-1 rounded">about</code> - Learn more about me</li>
+        <li><code class="bg-black/30 px-2 py-1 rounded">projects</code> - See my work</li>
+        <li><code class="bg-black/30 px-2 py-1 rounded">blog</code> - Read my latest posts</li>
+      </ul>
+    </div>`, 'clear');
     return '';
   },
   email: () => {
@@ -106,15 +85,111 @@ export const commands: Record<string, (args: string[]) => Promise<string> | stri
     return `Opening mailto:${packageJson.author.email}...`;
   },
   weather: async (args: string[]) => {
-    const city = args.join('+');
+    const city = args.join(' ');
 
     if (!city) {
-      return 'Usage: weather [city]. Example: weather Brussels';
+      return 'Usage: weather [city]. Example: weather Austin';
     }
 
-    const weather = await fetch(`https://wttr.in/${city}?ATm`);
+    try {
+      // Use OpenWeatherMap API (free tier available)
+      // You can get a free API key at https://openweathermap.org/api
+      // For now, using the wttr.in JSON API which doesn't require a key
+      const response = await fetch(`https://wttr.in/${city}?format=j1`);
+      const data = await response.json();
+      
+      if (!data || !data.current_condition) {
+        return 'Unable to fetch weather data for ' + city;
+      }
 
-    return weather.text();
+      // Build our own ASCII weather display
+      const current = data.current_condition[0];
+      const location = data.nearest_area[0];
+      const forecast = data.weather.slice(0, 3); // Next 3 days
+      
+      // Create custom ASCII art weather display
+      let output = '<div class="weather-display">';
+      
+      // Header
+      output += `<h2 class="text-xl mb-4">Weather Report: ${location.areaName[0].value}, ${location.region[0].value}</h2>`;
+      
+      // Current conditions
+      output += '<div class="current-weather mb-6 p-4 border rounded" style="border-color: #bfbebb;">';
+      output += '<div class="grid grid-cols-2 gap-4">';
+      output += '<div>';
+      output += `<p class="text-lg font-bold">${current.temp_F}°F</p>`;
+      output += `<p class="text-sm">${current.weatherDesc[0].value}</p>`;
+      output += `<p class="text-sm">Feels like: ${current.FeelsLikeF}°F</p>`;
+      output += '</div>';
+      output += '<div class="text-right">';
+      output += `<p class="text-sm">Wind: ${current.windspeedMiles} mph ${current.winddir16Point}</p>`;
+      output += `<p class="text-sm">Humidity: ${current.humidity}%</p>`;
+      output += `<p class="text-sm">Visibility: ${current.visibilityMiles} mi</p>`;
+      output += '</div>';
+      output += '</div>';
+      output += '</div>';
+      
+      // 3-day forecast
+      output += '<div class="forecast">';
+      output += '<h3 class="text-lg mb-3">3-Day Forecast</h3>';
+      output += '<div class="grid grid-cols-3 gap-2">';
+      
+      forecast.forEach((day: any) => {
+        const date = new Date(day.date);
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        
+        output += '<div class="forecast-day p-3 border rounded text-center" style="border-color: #bfbebb;">';
+        output += `<p class="font-bold">${dayName}</p>`;
+        output += `<p class="text-sm">${day.maxtempF}°/${day.mintempF}°</p>`;
+        output += `<p class="text-xs">${day.hourly[4].weatherDesc[0].value}</p>`;
+        output += `<p class="text-xs">💧 ${day.hourly[4].chanceofrain}%</p>`;
+        output += '</div>';
+      });
+      
+      output += '</div>';
+      output += '</div>';
+      
+      // ASCII art for current weather condition
+      output += '<div class="mt-6 text-center">';
+      output += '<pre class="inline-block text-xs">';
+      
+      const weatherCode = parseInt(current.weatherCode);
+      if (weatherCode === 113) { // Clear/Sunny
+        output += `    \\   /    
+     .-.     
+  ― (   ) ―  
+     \`-'     
+    /   \\    `;
+      } else if (weatherCode >= 116 && weatherCode <= 119) { // Cloudy
+        output += `    .--.     
+ .-(    ).   
+(___.__)__)  `;
+      } else if (weatherCode >= 176 && weatherCode <= 377) { // Rain
+        output += `    .--.     
+ .-(    ).   
+(___.__)__)  
+ ' ' ' ' '   `;
+      } else if (weatherCode >= 200 && weatherCode <= 232) { // Thunderstorm
+        output += `    .--.     
+ .-(    ).   
+(___.__)__)  
+  *  *  *    `;
+      } else { // Default cloudy
+        output += `    .--.     
+ .-(    ).   
+(___.__)__)  `;
+      }
+      
+      output += '</pre>';
+      output += '</div>';
+      
+      output += '</div>';
+      
+      return output;
+      
+    } catch (error) {
+      return `Unable to fetch weather data. Error: ${error}`;
+    }
   },
   exit: () => {
     return 'Please close the tab to exit.';
@@ -337,7 +412,6 @@ Built with:
 GitHub: ${packageJson.repository.url}`;
   },
   uptime: () => {
-    const start = performance.timeOrigin;
     const now = performance.now();
     const uptime = now / 1000;
 

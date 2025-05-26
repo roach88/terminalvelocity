@@ -2,6 +2,7 @@
   import { afterUpdate, onMount } from 'svelte'
   import { history } from '../stores/history'
   import { theme } from '../stores/theme'
+  import { setContent } from '../stores/content'
   import { commands, executeCommand, shortcutManager } from '../utils/commands'
   import { MobileAdapter } from '../utils/mobile'
   import { PerformanceOptimizer } from '../utils/performance'
@@ -36,6 +37,47 @@
 
   const handleInput = () => {
     debouncedUpdateSuggestions(command);
+  };
+  
+  // Helper function to get a nice title for commands
+  const getCommandTitle = (cmd: string): string => {
+    const titles: Record<string, string> = {
+      about: 'About Me',
+      projects: 'Projects',
+      blog: 'Blog Posts',
+      read: 'Blog Post',
+      project: 'Project Details',
+      help: 'Available Commands',
+      contact: 'Contact Information',
+      search: 'Search Results',
+      tags: 'Available Tags',
+      recent: 'Recent Content',
+      featured: 'Featured Content',
+      stats: 'Portfolio Statistics',
+      version: 'Version Information',
+      weather: 'Weather Report',
+      whoami: 'User Information',
+      hostname: 'System Information',
+      date: 'Current Date & Time'
+    };
+    return titles[cmd] || cmd.charAt(0).toUpperCase() + cmd.slice(1);
+  };
+  
+  // Helper function to format output with better HTML
+  const formatCommandOutput = (output: string, cmd: string): string => {
+    // If output already contains HTML, return as-is
+    if (output.includes('<') && output.includes('>')) {
+      return output;
+    }
+    
+    // Weather command now returns HTML, so we don't need special handling
+    
+    if (cmd === 'curl' || cmd === 'banner') {
+      return `<div class="overflow-x-auto"><pre class="whitespace-pre text-xs font-mono">${output}</pre></div>`;
+    }
+    
+    // Convert plain text to formatted HTML with word wrap
+    return `<pre class="whitespace-pre-wrap">${output}</pre>`;
   };
 
   const handleKeyDown = async (event: KeyboardEvent) => {
@@ -75,7 +117,13 @@
       );
 
       if (commandName !== 'clear') {
-        $history = [...$history, { command, outputs: [output] }];
+        // Add only the command to history (not the output)
+        $history = [...$history, { command, outputs: [] }];
+        
+        // Send output to the content panel
+        const title = getCommandTitle(commandName);
+        const formattedOutput = formatCommandOutput(output, commandName);
+        setContent(title, formattedOutput, command);
       }
 
       command = '';
