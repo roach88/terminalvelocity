@@ -6,13 +6,27 @@ interface BeehiivPost {
   subtitle?: string;
   slug: string;
   status: string;
-  created_at: string;
+  created: number;  // Unix timestamp
+  created_at?: string;  // For backwards compatibility
+  publish_date?: number;  // Unix timestamp
   published_at?: string;
+  displayed_date?: string | null;
   web_url: string;
   content_html?: string;
   content_text?: string;
+  content?: {
+    free?: {
+      web?: string;
+      email?: string;
+      rss?: string;
+    };
+    premium?: {
+      web?: string;
+      email?: string;
+    };
+  };
   thumbnail_url?: string;
-  authors?: Array<{
+  authors?: Array<string | {
     name: string;
     email?: string;
   }>;
@@ -30,16 +44,12 @@ interface BeehiivResponse {
 }
 
 class BeehiivAPI {
-  private apiKey: string;
-  private publicationId: string;
-  private baseUrl = 'https://api.beehiiv.com/v2';
+  // Cache for API responses
   private cache: Map<string, { data: any; timestamp: number }> = new Map();
   private cacheTimeout = 5 * 60 * 1000; // 5 minutes
 
   constructor() {
-    // These will be set from environment variables
-    this.apiKey = import.meta.env.VITE_BEEHIIV_API_KEY || '';
-    this.publicationId = import.meta.env.VITE_BEEHIIV_PUBLICATION_ID || '';
+    // API credentials are now handled server-side in Cloudflare Functions
   }
 
   private async fetchWithCache(url: string): Promise<any> {
@@ -48,15 +58,12 @@ class BeehiivAPI {
       return cached.data;
     }
 
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    // Use our Cloudflare Functions API endpoints
+    const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`Beehiiv API error: ${response.statusText}`);
+      const error = await response.json();
+      throw new Error(error.error || `API error: ${response.statusText}`);
     }
 
     const data = await response.json();
@@ -65,11 +72,8 @@ class BeehiivAPI {
   }
 
   async getPosts(limit = 10, page?: string): Promise<BeehiivResponse> {
-    if (!this.apiKey || !this.publicationId) {
-      throw new Error('Beehiiv API credentials not configured');
-    }
-
-    let url = `${this.baseUrl}/publications/${this.publicationId}/posts?limit=${limit}&status=published`;
+    // Use our Cloudflare Function endpoint
+    let url = `/api/beehiiv/posts?limit=${limit}`;
     if (page) {
       url += `&page=${page}`;
     }
@@ -78,13 +82,10 @@ class BeehiivAPI {
   }
 
   async getPost(postId: string): Promise<BeehiivPost> {
-    if (!this.apiKey) {
-      throw new Error('Beehiiv API credentials not configured');
-    }
-
-    const url = `${this.baseUrl}/posts/${postId}`;
+    // Use our Cloudflare Function endpoint
+    const url = `/api/beehiiv/post/${postId}`;
     const response = await this.fetchWithCache(url);
-    return response.data;
+    return response.data || response;
   }
 
   async searchPosts(query: string): Promise<BeehiivPost[]> {
@@ -108,35 +109,42 @@ class BeehiivAPI {
   }
 
   async subscribeEmail(email: string): Promise<boolean> {
-    if (!this.apiKey || !this.publicationId) {
-      throw new Error('Beehiiv API credentials not configured');
-    }
-
-    const url = `${this.baseUrl}/publications/${this.publicationId}/subscriptions`;
+    // Use our Cloudflare Function endpoint
+    const url = `/api/beehiiv/subscribe`;
     
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          email,
-          reactivate_existing: true,
-          send_welcome_email: true
-        })
+        body: JSON.stringify({ email })
       });
 
-      return response.ok;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Subscription failed');
+      }
+
+      return true;
     } catch (error) {
       console.error('Subscription error:', error);
-      return false;
+      throw error;
     }
   }
 
-  formatPostDate(dateString: string): string {
-    const date = new Date(dateString);
+  formatPostDate(dateValue: string | number): string {
+    // Handle Unix timestamp (seconds since epoch)
+    const timestamp = typeof dateValue === 'number' ? dateValue * 1000 : 
+                     (!isNaN(Number(dateValue)) ? Number(dateValue) * 1000 : dateValue);
+    
+    const date = new Date(timestamp);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Date unavailable';
+    }
+    
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 

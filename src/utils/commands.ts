@@ -253,7 +253,7 @@ Type 'projects' to see my work.
       output += '<div class="space-y-4">';
       
       posts.forEach((post, index) => {
-        const date = beehiivAPI.formatPostDate(post.created_at);
+        const date = beehiivAPI.formatPostDate(post.created || post.publish_date || Date.now() / 1000);
         output += '<div class="blog-post-item p-4 border rounded hover:bg-white/5" style="border-color: #bfbebb;">';
         output += `<h3 class="text-lg font-bold mb-1">${post.title}</h3>`;
         if (post.subtitle) {
@@ -310,27 +310,38 @@ Type 'projects' to see my work.
         output += `<p class="text-lg opacity-80 mb-3">${post.subtitle}</p>`;
       }
       output += `<div class="flex items-center gap-4 text-sm opacity-60">`;
-      output += `<span>${beehiivAPI.formatPostDate(post.created_at)}</span>`;
+      output += `<span>${beehiivAPI.formatPostDate(post.created || post.publish_date || Date.now() / 1000)}</span>`;
       if (post.authors && post.authors.length > 0) {
-        output += `<span>by ${post.authors[0].name}</span>`;
+        const authorName = typeof post.authors[0] === 'string' ? post.authors[0] : post.authors[0].name;
+        output += `<span>by ${authorName}</span>`;
       }
       output += `</div>`;
       output += `</header>`;
       
       // Content
       output += '<div class="prose prose-invert max-w-none">';
-      if (post.content_html) {
+      
+      // Check various content fields (content.free.web is the main content)
+      const contentHtml = post.content_html || 
+                         post.content?.free?.web || 
+                         post.content?.free?.email || 
+                         post.content?.premium?.web;
+      const contentText = post.content_text || 
+                         post.content?.free?.rss;
+      
+      if (contentHtml) {
         // Clean up the HTML for better display
-        let content = post.content_html
+        let content = contentHtml
           .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
           .replace(/style="[^"]*"/g, '') // Remove inline styles
           .replace(/class="[^"]*"/g, ''); // Remove classes
         output += content;
-      } else if (post.content_text) {
+      } else if (contentText) {
         // Fallback to text content with basic formatting
-        output += `<div class="whitespace-pre-wrap">${post.content_text}</div>`;
+        output += `<div class="whitespace-pre-wrap">${contentText}</div>`;
       } else {
-        output += '<p>Content not available for this post.</p>';
+        output += '<p class="opacity-60">Content not available for this post. ';
+        output += `<a href="${post.web_url}" target="_blank" class="underline">View on web →</a></p>`;
       }
       output += '</div>';
       
@@ -435,7 +446,7 @@ Portfolio: ${packageJson.author.url || 'https://terminalvelocity.dev'}`;
       output += '<div class="space-y-4">';
       
       posts.forEach(post => {
-        const date = beehiivAPI.formatPostDate(post.created_at);
+        const date = beehiivAPI.formatPostDate(post.created || post.publish_date || Date.now() / 1000);
         output += '<div class="search-result p-4 border rounded" style="border-color: #bfbebb;">';
         output += `<h3 class="text-lg font-bold mb-1">${post.title}</h3>`;
         if (post.subtitle) {

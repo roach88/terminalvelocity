@@ -1,100 +1,91 @@
 # Beehiiv Integration Setup
 
-This guide will help you connect your Beehiiv newsletter to your terminal portfolio.
+This terminal portfolio integrates with Beehiiv for blog content management. The integration uses Cloudflare Functions to proxy API requests server-side, avoiding CORS issues.
 
-## Prerequisites
+## Architecture
 
-1. A Beehiiv account with at least one publication
-2. API access (available on paid Beehiiv plans)
+The Beehiiv integration follows a server-side proxy pattern:
 
-## Setup Steps
+1. **Client-side commands** (`blog`, `read`, `search`, `subscribe`) make requests to local API endpoints
+2. **Cloudflare Functions** (`/api/beehiiv/*`) handle the actual Beehiiv API calls server-side
+3. **Beehiiv API client** (`src/utils/beehiiv.ts`) manages caching and formatting
 
-### 1. Get Your Beehiiv API Credentials
+## Setup Instructions
 
-1. Log in to your Beehiiv account
+### 1. Get Beehiiv API Credentials
+
+1. Log in to your [Beehiiv account](https://app.beehiiv.com)
 2. Go to Settings → Integrations → API
-3. Create a new API key with the following permissions:
-   - `publications:read` - To fetch your publication details
-   - `posts:read` - To fetch newsletter posts
-   - `subscriptions:write` - To add new subscribers
-
+3. Create a new API key with read permissions
 4. Copy your API key and Publication ID
 
-### 2. Configure Environment Variables
+### 2. Local Development
 
-1. Copy the example environment file:
-   ```bash
-   cp .env.example .env
+For local development with Cloudflare Pages:
+
+1. Create a `.dev.vars` file in the project root:
+   ```
+   BEEHIIV_API_KEY=your_api_key_here
+   BEEHIIV_PUBLICATION_ID=your_publication_id_here
    ```
 
-2. Edit `.env` and add your credentials:
-   ```
-   VITE_BEEHIIV_API_KEY=your_api_key_here
-   VITE_BEEHIIV_PUBLICATION_ID=your_publication_id_here
-   ```
+2. The development server will automatically load these variables for Cloudflare Functions
 
-### 3. Test the Integration
+### 3. Production Deployment (Cloudflare Pages)
 
-1. Start the development server:
-   ```bash
-   yarn dev
-   ```
-
-2. Test the commands:
-   - `blog` - Should list your recent newsletter posts
-   - `read <post-id>` - Should display a specific post
-   - `search <query>` - Should search through your posts
-   - `subscribe <email>` - Should add a new subscriber
+1. In your Cloudflare Pages project settings
+2. Go to Settings → Environment variables
+3. Add the following variables:
+   - `BEEHIIV_API_KEY`: Your Beehiiv API key
+   - `BEEHIIV_PUBLICATION_ID`: Your Beehiiv publication ID
 
 ## Available Commands
 
-### blog
-Lists your 20 most recent newsletter posts with titles, subtitles, and publish dates.
+- `blog` - List recent blog posts
+- `blog [number]` - List specific number of posts
+- `read [post-id]` - Read a specific blog post
+- `search [query]` - Search blog posts
+- `subscribe [email]` - Subscribe to the newsletter
 
-### read <post-id>
-Displays the full content of a specific newsletter post. The post ID is shown in the blog list.
+## File Structure
 
-### search <query>
-Searches through all your newsletter posts for the given query. Searches in titles, subtitles, and content.
-
-### subscribe <email>
-Adds a new subscriber to your Beehiiv newsletter. They'll receive a welcome email and confirmation.
+```
+functions/
+├── api/
+│   └── beehiiv/
+│       ├── posts.ts         # List posts endpoint
+│       ├── post/
+│       │   └── [id].ts      # Get single post endpoint
+│       └── subscribe.ts     # Subscribe endpoint
+src/
+└── utils/
+    └── beehiiv.ts          # Client-side API wrapper
+```
 
 ## Troubleshooting
 
-### "Newsletter integration not configured"
-- Make sure your `.env` file exists and contains valid credentials
-- Restart the development server after adding credentials
-- Check that your API key has the required permissions
+### "Failed to fetch" Error
 
-### "Error loading blog posts"
-- Verify your Publication ID is correct
-- Ensure your API key is valid and not expired
-- Check your Beehiiv plan includes API access
+This usually means:
+1. Environment variables are not set (check `.dev.vars` for local dev)
+2. API credentials are invalid
+3. Beehiiv API is down
 
-### Posts not showing up
-- Make sure your posts are published (not draft)
-- The integration only fetches published posts
-- Check the Beehiiv dashboard to confirm posts are live
+### CORS Issues
 
-## API Rate Limits
+The integration uses Cloudflare Functions specifically to avoid CORS issues. If you're seeing CORS errors:
+1. Ensure you're using the local API endpoints (`/api/beehiiv/*`)
+2. Check that Cloudflare Functions are running (part of `yarn dev`)
+3. Verify the `Access-Control-Allow-Origin` headers in the function responses
 
-The integration includes built-in caching to minimize API calls:
-- Post lists are cached for 5 minutes
-- Individual posts are cached for 5 minutes
-- Search results are generated from cached data when possible
+### Caching
 
-## Customization
-
-You can customize the display in `src/utils/commands.ts`:
-- Change the number of posts shown in the blog list
-- Modify the HTML templates for post display
-- Add additional post metadata to the display
-- Customize the subscribe success message
+The client caches API responses for 5 minutes to improve performance. To clear the cache:
+- Run `beehiivAPI.clearCache()` in the browser console
+- Or reload the page
 
 ## Security Notes
 
-- Never commit your `.env` file to version control
-- The `.env` file is already in `.gitignore`
-- Consider using environment variables in your deployment platform
-- The API key is only used server-side and never exposed to the client
+- Never commit `.dev.vars` or expose API keys in client-side code
+- All API keys should only be used in Cloudflare Functions (server-side)
+- The client-side code only knows about the local API endpoints

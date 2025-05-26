@@ -75,17 +75,29 @@ The weather command uses the wttr.in JSON API to fetch data and creates a custom
 - Content panel updates with each command execution
 - No theme switching - uses permanent color scheme
 
+## Beehiiv Integration
+
+The blog system is integrated with Beehiiv for content management. See `BEEHIIV_SETUP.md` for setup instructions.
+
+- **Architecture**: Uses Cloudflare Functions to proxy API requests server-side
+- **Commands**: `blog`, `read [id]`, `search [query]`, `subscribe [email]`
+- **Caching**: 5-minute client-side cache for API responses
+- **Setup**: Requires BEEHIIV_API_KEY and BEEHIIV_PUBLICATION_ID environment variables
+
 ## TODO List
 
-### Immediate Priority - Beehiiv Integration
+### Immediate Priority - Complete Beehiiv Setup
 
-- [ ] Set up Beehiiv API integration
-- [ ] Create `blog` command to list all newsletter posts
-- [ ] Update `read` command to fetch and display individual posts from Beehiiv
-- [ ] Add pagination support for blog list
-- [ ] Create blog post search functionality
-- [ ] Add newsletter signup command that subscribes to Beehiiv
-- [ ] Cache Beehiiv API responses for performance
+- [x] Set up Beehiiv API integration with Cloudflare Functions
+- [x] Create `blog` command to list all newsletter posts
+- [x] Update `read` command to fetch and display individual posts from Beehiiv
+- [x] Create blog post search functionality
+- [x] Add newsletter signup command that subscribes to Beehiiv
+- [x] Cache Beehiiv API responses for performance
+- [x] Add Beehiiv API credentials to .dev.vars for local testing
+- [x] Test all Beehiiv commands once credentials are configured
+- [ ] Fix Beehiiv content display - API not returning post content even with expand=content parameter
+- [ ] Add pagination UI for blog list
 
 ### High Priority
 
