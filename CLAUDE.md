@@ -36,6 +36,7 @@ The app follows a component-based architecture with reactive stores:
 ### Color Scheme
 
 The app uses a permanent custom color scheme:
+
 - Background: `#201e1d` (dark)
 - Foreground: `#ebdbb2` (light cream)
 - ASCII Banner: `#c96342` (coral/salmon)
@@ -45,6 +46,7 @@ The app uses a permanent custom color scheme:
 ### Command Registration
 
 Commands are registered in `src/utils/commands.ts` as an object where keys are command names and values are functions that return strings or Promises. The system supports:
+
 - Synchronous commands (return string/HTML)
 - Asynchronous commands (return Promise<string>)
 - Command arguments passed as string array
@@ -54,6 +56,7 @@ Commands are registered in `src/utils/commands.ts` as an object where keys are c
 ### Custom Weather Display
 
 The weather command uses the wttr.in JSON API to fetch data and creates a custom HTML display with:
+
 - Current conditions with temperature, wind, humidity
 - 3-day forecast with high/low temps and rain chance
 - ASCII art weather icons
@@ -74,7 +77,18 @@ The weather command uses the wttr.in JSON API to fetch data and creates a custom
 
 ## TODO List
 
+### Immediate Priority - Beehiiv Integration
+
+- [ ] Set up Beehiiv API integration
+- [ ] Create `blog` command to list all newsletter posts
+- [ ] Update `read` command to fetch and display individual posts from Beehiiv
+- [ ] Add pagination support for blog list
+- [ ] Create blog post search functionality
+- [ ] Add newsletter signup command that subscribes to Beehiiv
+- [ ] Cache Beehiiv API responses for performance
+
 ### High Priority
+
 - [ ] Add more commands (skills, experience, education, etc.)
 - [ ] Implement contact form command that sends emails
 - [ ] Add command to download resume/CV as PDF
@@ -82,6 +96,7 @@ The weather command uses the wttr.in JSON API to fetch data and creates a custom
 - [ ] Add sound effects for terminal interactions (optional setting)
 
 ### Medium Priority
+
 - [ ] Implement command search/filter in history
 - [ ] Add keyboard shortcuts panel/help
 - [ ] Create mini-games as terminal commands (snake, tetris, etc.)
@@ -90,6 +105,7 @@ The weather command uses the wttr.in JSON API to fetch data and creates a custom
 - [ ] Add syntax highlighting for code blocks in content
 
 ### Low Priority
+
 - [ ] Add command aliases/custom shortcuts
 - [ ] Implement terminal multiplexer (multiple panels)
 - [ ] Add export history feature
@@ -98,6 +114,7 @@ The weather command uses the wttr.in JSON API to fetch data and creates a custom
 - [ ] Implement autocomplete for blog/project titles
 
 ### Future Enhancements
+
 - [ ] Real-time collaboration features
 - [ ] WebSocket integration for live updates
 - [ ] Terminal sharing via URL
@@ -106,6 +123,7 @@ The weather command uses the wttr.in JSON API to fetch data and creates a custom
 - [ ] PWA support for offline usage
 
 ### Bug Fixes & Improvements
+
 - [ ] Optimize mobile keyboard handling
 - [ ] Improve command parsing for edge cases
 - [ ] Add loading states for async commands

@@ -4,6 +4,7 @@ import { setContent } from '../stores/content';
 import { fetchAbout, fetchBlogPost, fetchBlogPosts, fetchProject, fetchProjects, searchContent } from './content';
 import { TerminalFormatter } from './formatter';
 import { ShortcutManager } from './shortcuts';
+import { beehiivAPI } from './beehiiv';
 
 const hostname = window.location.hostname;
 const shortcutManager = new ShortcutManager();
@@ -11,7 +12,7 @@ const shortcutManager = new ShortcutManager();
 export const commands: Record<string, (args: string[]) => Promise<string> | string> = {
   help: () => {
     const commandGroups = {
-      'Content': ['about', 'blog', 'read', 'projects', 'project', 'contact'],
+      'Content': ['about', 'blog', 'read', 'projects', 'project', 'contact', 'subscribe'],
       'Discovery': ['search', 'tags', 'recent', 'featured', 'stats'],
       'System': ['help', 'clear', 'hostname', 'whoami', 'date', 'version', 'uptime'],
       'Utilities': ['shortcuts', 'aliases'],
@@ -239,37 +240,118 @@ Type 'projects' to see my work.
     return TerminalFormatter.stripHtml(aboutData.content);
   },
   blog: async (args: string[]) => {
-    const posts = await fetchBlogPosts();
-    if (posts.length === 0) {
-      return 'No blog posts available.';
-    }
+    try {
+      const response = await beehiivAPI.getPosts(20); // Get 20 most recent posts
+      const posts = response.data;
+      
+      if (posts.length === 0) {
+        return '<p>No blog posts available yet. Check back soon!</p>';
+      }
 
-    // Handle 'blog list' for compatibility
-    if (args.length > 0 && args[0] === 'list') {
-      return posts.map(post => `${post.date} - ${post.title}`).join('\n');
+      let output = '<div class="blog-list">';
+      output += '<h2 class="text-xl mb-4">Recent Newsletter Posts</h2>';
+      output += '<div class="space-y-4">';
+      
+      posts.forEach((post, index) => {
+        const date = beehiivAPI.formatPostDate(post.created_at);
+        output += '<div class="blog-post-item p-4 border rounded hover:bg-white/5" style="border-color: #bfbebb;">';
+        output += `<h3 class="text-lg font-bold mb-1">${post.title}</h3>`;
+        if (post.subtitle) {
+          output += `<p class="text-sm opacity-80 mb-2">${post.subtitle}</p>`;
+        }
+        output += `<div class="flex justify-between items-center text-sm">`;
+        output += `<span class="opacity-60">${date}</span>`;
+        output += `<code class="bg-black/30 px-2 py-1 rounded">read ${post.slug || post.id}</code>`;
+        output += `</div>`;
+        output += '</div>';
+      });
+      
+      output += '</div>';
+      
+      if (response.next_page) {
+        output += '<p class="mt-4 text-sm opacity-60">Showing 20 most recent posts. More posts available.</p>';
+      }
+      
+      output += '<div class="mt-6 p-4 bg-black/20 rounded">';
+      output += '<p class="text-sm">💡 <strong>Tips:</strong></p>';
+      output += '<ul class="list-disc list-inside text-sm mt-2 space-y-1">';
+      output += '<li>Use <code class="bg-black/30 px-2 py-0.5 rounded">read &lt;slug&gt;</code> to read a full post</li>';
+      output += '<li>Use <code class="bg-black/30 px-2 py-0.5 rounded">search &lt;term&gt;</code> to search posts</li>';
+      output += '<li>Use <code class="bg-black/30 px-2 py-0.5 rounded">subscribe</code> to join the newsletter</li>';
+      output += '</ul>';
+      output += '</div>';
+      output += '</div>';
+      
+      return output;
+    } catch (error) {
+      if ((error as any).message.includes('credentials not configured')) {
+        return '<p>Newsletter integration not configured. Please check back later!</p>';
+      }
+      return `<p>Error loading blog posts: ${(error as any).message}</p>`;
     }
-
-    // Default behavior: show formatted list with slugs
-    let output = 'Blog Posts:\n\n';
-    posts.forEach((post, i) => {
-      output += `[${i + 1}] ${post.date} - ${post.title}\n`;
-      output += `    read ${post.slug}\n\n`;
-    });
-    output += 'Tip: Use "read <slug>" to read a post, or "blog list" for a compact view.';
-    return output;
   },
   read: async (args: string[]) => {
     if (args.length === 0) {
-      return 'Usage: read <post-slug>';
+      return '<p>Usage: <code>read &lt;post-id&gt;</code></p>';
     }
 
-    const slug = args[0];
-    const post = await fetchBlogPost(slug);
-    if (!post) {
-      return `Blog post '${slug}' not found.`;
+    try {
+      const identifier = args[0];
+      
+      // Try to fetch the post by ID
+      const post = await beehiivAPI.getPost(identifier);
+      
+      let output = '<article class="blog-post">';
+      
+      // Header
+      output += `<header class="mb-6">`;
+      output += `<h1 class="text-2xl font-bold mb-2">${post.title}</h1>`;
+      if (post.subtitle) {
+        output += `<p class="text-lg opacity-80 mb-3">${post.subtitle}</p>`;
+      }
+      output += `<div class="flex items-center gap-4 text-sm opacity-60">`;
+      output += `<span>${beehiivAPI.formatPostDate(post.created_at)}</span>`;
+      if (post.authors && post.authors.length > 0) {
+        output += `<span>by ${post.authors[0].name}</span>`;
+      }
+      output += `</div>`;
+      output += `</header>`;
+      
+      // Content
+      output += '<div class="prose prose-invert max-w-none">';
+      if (post.content_html) {
+        // Clean up the HTML for better display
+        let content = post.content_html
+          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
+          .replace(/style="[^"]*"/g, '') // Remove inline styles
+          .replace(/class="[^"]*"/g, ''); // Remove classes
+        output += content;
+      } else if (post.content_text) {
+        // Fallback to text content with basic formatting
+        output += `<div class="whitespace-pre-wrap">${post.content_text}</div>`;
+      } else {
+        output += '<p>Content not available for this post.</p>';
+      }
+      output += '</div>';
+      
+      // Footer
+      output += '<footer class="mt-8 pt-4 border-t" style="border-color: #bfbebb;">';
+      output += '<div class="flex justify-between items-center">';
+      output += `<a href="${post.web_url}" target="_blank" class="text-sm underline">View on Beehiiv →</a>`;
+      output += '<div class="text-sm">';
+      output += '<span>Use </span>';
+      output += '<code class="bg-black/30 px-2 py-0.5 rounded">blog</code>';
+      output += '<span> to see more posts</span>';
+      output += '</div>';
+      output += '</div>';
+      output += '</footer>';
+      
+      output += '</article>';
+      
+      return output;
+    } catch (error: any) {
+      return `<p>Error loading post: ${error.message || 'Unknown error'}</p>`;
     }
-
-    return TerminalFormatter.formatBlogPost(post);
   },
   projects: async () => {
     const projects = await fetchProjects();
@@ -298,19 +380,81 @@ Email: ${packageJson.author.email}
 GitHub: ${packageJson.repository.url}
 Portfolio: ${packageJson.author.url || 'https://terminalvelocity.dev'}`;
   },
+  subscribe: async (args: string[]) => {
+    if (args.length === 0) {
+      return `<div class="subscribe-form">
+        <h2 class="text-xl mb-4">Subscribe to the Newsletter</h2>
+        <p class="mb-4">Get the latest posts delivered straight to your inbox!</p>
+        <div class="p-4 bg-black/20 rounded">
+          <p class="text-sm">To subscribe, use: <code class="bg-black/30 px-2 py-0.5 rounded">subscribe &lt;your-email&gt;</code></p>
+          <p class="text-sm mt-2">Example: <code class="bg-black/30 px-2 py-0.5 rounded">subscribe me@example.com</code></p>
+        </div>
+      </div>`;
+    }
+
+    const email = args[0];
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!emailRegex.test(email)) {
+      return '<p>Please provide a valid email address.</p>';
+    }
+
+    try {
+      const success = await beehiivAPI.subscribeEmail(email);
+      
+      if (success) {
+        return `<div class="subscribe-success">
+          <h2 class="text-xl mb-4">🎉 Welcome aboard!</h2>
+          <p>You've been successfully subscribed to the newsletter.</p>
+          <p class="mt-2">Check your email for a confirmation message.</p>
+        </div>`;
+      } else {
+        return '<p>There was an issue subscribing. Please try again later.</p>';
+      }
+    } catch (error: any) {
+      return `<p>Error: ${error.message || 'Unable to subscribe at this time.'}</p>`;
+    }
+  },
   search: async (args: string[]) => {
     if (args.length === 0) {
-      return 'Usage: search <query>\nExample: search "terminal portfolio"';
+      return '<p>Usage: <code>search &lt;query&gt;</code></p><p>Example: <code>search "javascript tips"</code></p>';
     }
 
     const query = args.join(' ');
-    const results = await searchContent(query);
-
-    if (results.length === 0) {
-      return `No results found for "${query}".`;
+    
+    try {
+      const posts = await beehiivAPI.searchPosts(query);
+      
+      if (posts.length === 0) {
+        return `<p>No results found for "${query}".</p>`;
+      }
+      
+      let output = '<div class="search-results">';
+      output += `<h2 class="text-xl mb-4">Search results for "${query}"</h2>`;
+      output += `<p class="text-sm opacity-60 mb-4">Found ${posts.length} post${posts.length !== 1 ? 's' : ''}</p>`;
+      output += '<div class="space-y-4">';
+      
+      posts.forEach(post => {
+        const date = beehiivAPI.formatPostDate(post.created_at);
+        output += '<div class="search-result p-4 border rounded" style="border-color: #bfbebb;">';
+        output += `<h3 class="text-lg font-bold mb-1">${post.title}</h3>`;
+        if (post.subtitle) {
+          output += `<p class="text-sm opacity-80 mb-2">${post.subtitle}</p>`;
+        }
+        output += `<div class="flex justify-between items-center text-sm">`;
+        output += `<span class="opacity-60">${date}</span>`;
+        output += `<code class="bg-black/30 px-2 py-1 rounded">read ${post.id}</code>`;
+        output += `</div>`;
+        output += '</div>';
+      });
+      
+      output += '</div>';
+      output += '</div>';
+      
+      return output;
+    } catch (error: any) {
+      return `<p>Error searching posts: ${error.message || 'Unknown error'}</p>`;
     }
-
-    return `Search results for "${query}":\n\n${TerminalFormatter.formatSearchResults(results)}`;
   },
   tags: async () => {
     const posts = await fetchBlogPosts();
